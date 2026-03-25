@@ -14,8 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const letterCloseBtn = document.getElementById('letterClose');
   const copyWishBtn  = document.getElementById('copyWish');
 
+  const passwordOverlay = document.getElementById('passwordOverlay');
+  const passwordInput   = document.getElementById('passwordInput');
+  const passwordSubmit  = document.getElementById('passwordSubmit');
+  const passwordCancel  = document.getElementById('passwordCancel');
+  const passwordError   = document.getElementById('passwordError');
+
   if (!scene || !envelope || !letter || !extra || !backdrop || !confettiCanvas ||
-      !toggleBtn || !surpriseBtn || !themeBtn || !letterCloseBtn || !copyWishBtn) {
+      !toggleBtn || !surpriseBtn || !themeBtn || !letterCloseBtn || !copyWishBtn ||
+      !passwordOverlay || !passwordInput || !passwordSubmit || !passwordCancel || !passwordError) {
     console.warn('Missing DOM elements');
     return;
   }
@@ -24,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let isOpen    = false;
   let isReading = false;
+  let isUnlocked = false;
+
+  const CORRECT_PASSWORD = '52'; // Change this as needed
 
   const THEME_KEY = 'hb_theme';
 
@@ -106,21 +116,66 @@ document.addEventListener('DOMContentLoaded', () => {
     return tag === 'button' || tag === 'a' || tag === 'input' || tag === 'textarea' || el.isContentEditable;
   };
 
+  // ── Password Logic ──────────────────────────────────────
+  const showPasswordModal = () => {
+    passwordOverlay.classList.add('active');
+    passwordOverlay.setAttribute('aria-hidden', 'false');
+    passwordInput.value = '';
+    passwordError.style.display = 'none';
+    setTimeout(() => passwordInput.focus(), 100);
+  };
+
+  const hidePasswordModal = () => {
+    passwordOverlay.classList.remove('active');
+    passwordOverlay.setAttribute('aria-hidden', 'true');
+  };
+
+  const checkPassword = () => {
+    if (passwordInput.value === CORRECT_PASSWORD) {
+      isUnlocked = true;
+      hidePasswordModal();
+      setOpen(true, { focusEnvelope: true });
+    } else {
+      passwordError.style.display = 'block';
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  };
+
+  const requestOpen = (options = {}) => {
+    if (isUnlocked || isOpen) {
+      setOpen(!isOpen, options);
+    } else {
+      showPasswordModal();
+    }
+  };
+
   // ── Event listeners ─────────────────────────────────────
+
+  // Password Modal Events
+  passwordSubmit.addEventListener('click', checkPassword);
+  passwordCancel.addEventListener('click', hidePasswordModal);
+  passwordOverlay.addEventListener('click', (e) => {
+    if (e.target === passwordOverlay) hidePasswordModal();
+  });
+  passwordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkPassword();
+    if (e.key === 'Escape') hidePasswordModal();
+  });
 
   // Clicking the envelope body (not the letter) → open/close
   envelope.addEventListener('click', (e) => {
     // If the click originated inside the letter card, let the letter handler deal with it
     if (letter.contains(e.target)) return;
     if (isReading) return;
-    setOpen(!isOpen);
+    requestOpen();
   });
 
   envelope.addEventListener('keydown', (e) => {
     if (e.code !== 'Space' && e.key !== 'Enter') return;
     e.preventDefault();
     if (isReading) return;
-    setOpen(!isOpen);
+    requestOpen();
   });
 
   // Clicking the letter card (when open but not yet reading) → enter reading mode
@@ -140,16 +195,21 @@ document.addEventListener('DOMContentLoaded', () => {
     envelope.focus();
   });
 
-  // Backdrop click closes reading mode
+  // Backdrop click closes reading mode or password modal
   backdrop.addEventListener('click', () => {
-    setReading(false);
-    envelope.focus();
+    if (isReading) {
+      setReading(false);
+      envelope.focus();
+    }
+    if (passwordOverlay.classList.contains('active')) {
+      hidePasswordModal();
+    }
   });
 
   // Toggle button
   toggleBtn.addEventListener('click', () => {
     if (isReading && isOpen) setReading(false);
-    setOpen(!isOpen, { focusEnvelope: true });
+    requestOpen({ focusEnvelope: true });
   });
 
   // Surprise button
@@ -207,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.code === 'Space') {
       e.preventDefault();
       if (isReading) return;
-      setOpen(!isOpen);
+      requestOpen();
       return;
     }
 

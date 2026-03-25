@@ -138,7 +138,6 @@ body {
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
-  backdrop-filter: blur(14px);
   box-shadow: var(--shadow-soft);
 }
 
@@ -209,6 +208,35 @@ button {
   cursor: pointer;
   outline: none;
   isolation: isolate;
+}
+
+#envelope::after {
+  content: "Click to Open";
+  position: absolute;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--btn-accent);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  white-space: nowrap;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#envelope:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+#envelope.open::after {
+  display: none;
 }
 
 #envelope:hover {
@@ -319,8 +347,39 @@ button {
   transition:
     transform 0.52s 0.28s cubic-bezier(0.25, 0.8, 0.25, 1),
     box-shadow 0.3s ease;
-  will-change: transform;
   cursor: pointer;
+  overflow: hidden;
+}
+
+.letter::after {
+  content: "Click to Read";
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  background: var(--btn-accent);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 20;
+  white-space: nowrap;
+}
+
+body[data-theme="midnight"] .letter::after {
+  color: #000;
+}
+
+.open .letter:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+body.is-reading .letter::after {
+  display: none;
 }
 
 /* == WAX SEAL == */
@@ -426,6 +485,13 @@ button {
   transform: translateY(-175px) rotate(-1deg);
   box-shadow: 0 22px 65px rgba(0, 0, 0, 0.18);
   z-index: 9;
+  /* Fix text blurring in some browsers */
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+#envelope.open {
+  transform-style: flat;
 }
 
 .open .words {
@@ -543,7 +609,6 @@ button {
   font-weight: 650;
   letter-spacing: 0.2px;
   cursor: pointer;
-  backdrop-filter: blur(12px);
   box-shadow: var(--shadow-soft);
   transition:
     transform 0.15s ease,
@@ -608,8 +673,6 @@ body[data-theme="midnight"] #toggle {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   z-index: 900;
 }
 
@@ -622,6 +685,15 @@ body.is-reading .extra {
   display: block;
 }
 
+body.is-reading .scene {
+  perspective: none !important;
+}
+
+body.is-reading .envelope-wrapper {
+  perspective: none !important;
+  transform: none !important;
+}
+
 body.is-reading .letter {
   position: fixed !important;
   left: 50% !important;
@@ -630,7 +702,7 @@ body.is-reading .letter {
   height: auto !important;
   max-height: min(680px, 85vh) !important;
   transform: translate(-50%, -50%) !important;
-  padding: 32px 30px 36px !important;
+  padding: 56px 30px 36px !important;
   border-radius: 18px !important;
   z-index: 1000 !important;
   text-align: left !important;
@@ -641,10 +713,24 @@ body.is-reading .letter {
   overflow-x: hidden !important;
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.06),
-    0 30px 80px rgba(0, 0, 0, 0.28) !important;
+    0 30px 80px rgba(0, 0, 0, 0.35) !important;
+  /* Ensure background is fully opaque to block any blur from behind */
   background: var(--letter-color) !important;
   cursor: default !important;
   transition: none !important;
+  /* Force a new stacking context to prevent filter bleed */
+  isolation: isolate !important;
+  backface-visibility: hidden !important;
+  transform-style: flat !important;
+  filter: none !important; /* Explicitly disable any filters inherited */
+  -webkit-font-smoothing: antialiased;
+}
+
+body.is-reading #envelope {
+  transform: none !important;
+  transition: box-shadow 150ms ease-out !important;
+  transform-style: flat !important;
+  will-change: auto !important;
 }
 
 body.is-reading .letter-close {
@@ -661,10 +747,9 @@ body.is-reading .heart-icon {
 
 .letter-close {
   appearance: none;
-  position: sticky;
-  top: 0;
-  align-self: flex-end;
-  flex-shrink: 0;
+  position: absolute;
+  top: 12px;
+  right: 12px;
   width: 36px;
   height: 36px;
   padding: 0;
@@ -684,8 +769,6 @@ body.is-reading .heart-icon {
     opacity 0.2s ease,
     background 0.2s ease;
   z-index: 2;
-  margin-left: auto;
-  margin-bottom: 4px;
 }
 
 .letter-close:hover {
@@ -801,8 +884,17 @@ body.is-reading .heart-icon {
   .envelope-wrapper {
     height: 350px;
   }
-  body.is-reading .letter {
-    padding: 24px 18px 28px !important;
+  body.is-reading .scene {
+  perspective: none !important;
+}
+
+body.is-reading .envelope-wrapper {
+  perspective: none !important;
+  transform: none !important;
+}
+
+body.is-reading .letter {
+    padding: 52px 18px 28px !important;
   }
 }
 
@@ -825,4 +917,119 @@ body.is-reading .heart-icon {
   .floating-heart {
     opacity: 0 !important;
   }
+}
+
+/* == PASSWORD MODAL == */
+.password-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 2000;
+}
+
+.password-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.password-card {
+  background: var(--bg-1);
+  padding: 40px;
+  border-radius: var(--radius);
+  width: min(400px, 90vw);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+  text-align: center;
+}
+
+.password-overlay.active .password-card {
+  transform: translateY(0);
+}
+
+.lock-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.password-card h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  color: var(--text);
+}
+
+.password-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+#passwordInput {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--btn-border);
+  background: var(--bg-2);
+  color: var(--text);
+  font-size: 1rem;
+  text-align: center;
+}
+
+#passwordInput:focus {
+  outline: 2px solid var(--btn-accent);
+  border-color: transparent;
+}
+
+.password-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.password-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.password-actions button.primary {
+  background: var(--btn-accent);
+  color: white;
+  border: none;
+}
+
+.password-actions button.primary:hover {
+  filter: brightness(1.1);
+}
+
+#passwordSubmit.primary {
+  color: #fff;
+}
+
+body[data-theme="midnight"] #passwordSubmit.primary {
+  color: #000;
+}
+
+.error-text {
+  color: #d93025;
+  font-size: 0.85rem;
+  display: none;
+  margin: 0;
 }

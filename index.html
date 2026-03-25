@@ -40,7 +40,7 @@
                         <div class="words line1">Happy 25th Birthday David!</div>
                         <div class="words line2">May your builds be green</div>
                         <div class="words line3">and your bugs be few.</div>
-                        <div class="words line4">BIRA BANAT TODO — TODO ✊!</div>
+                        <div class="words line4">BIRA BANAT BOSSING ✊!</div>
                         <div class="extra" id="extra" aria-hidden="true">
                             <div class="divider"></div>
                             <div class="extra-title">A tiny deploy script for today:</div>
@@ -74,6 +74,20 @@ npm run celebrate</code></pre>
             <p class="hint"><span class="kbd">Space</span> open/close &middot; <span class="kbd">S</span> surprise &middot; <span class="kbd">T</span> theme</p>
         </footer>
     </main>
+
+    <div class="password-overlay" id="passwordOverlay" aria-hidden="true">
+        <div class="password-card">
+            <div class="lock-icon">🔒</div>
+            <h2>Locked Envelope</h2>
+            <p>Please enter the password to open.</p>
+            <input type="password" id="passwordInput" placeholder="Enter password">
+            <div class="password-actions">
+                <button id="passwordSubmit" class="primary">Unlock</button>
+                <button id="passwordCancel">Cancel</button>
+            </div>
+            <p id="passwordError" class="error-text">Incorrect password. Please try again.</p>
+        </div>
+    </div>
 
     <div class="backdrop" id="backdrop" aria-hidden="true"></div>
     <canvas id="confetti" aria-hidden="true"></canvas>
