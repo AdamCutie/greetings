@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greetings!</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main class="app">
+        <header class="title">
+            <h1>Happy na Birthday mopa!!</h1>
+            <p class="subtitle">Click the envelope (or press <span class="kbd">Space</span>)</p>
+        </header>
+
+        <div class="scene" id="scene">
+            <div class="envelope-wrapper">
+                <div id="envelope" class="close" role="button" tabindex="0" aria-expanded="false" aria-label="Birthday envelope">
+                    <!-- Flap (top triangle) -->
+                    <div class="front flap"></div>
+                    <!-- Bottom pocket V -->
+                    <div class="front pocket"></div>
+
+                    <!-- Wax seal — visible on closed envelope -->
+                    <div class="wax-seal" aria-hidden="true">
+                        <div class="wax-seal-circle">
+                            <span class="wax-seal-icon">🌿</span>
+                        </div>
+                    </div>
+
+                    <!-- From tag -->
+                    <div class="from-tag">from: Vincent</div>
+
+                    <!-- Letter card (rises when open, expands when clicked) -->
+                    <div class="letter" id="letter">
+                        <button class="letter-close" id="letterClose" type="button" aria-label="Close letter">&times;</button>
+                        <div class="words line1">Happy 25th Birthday David!</div>
+                        <div class="words line2">May your builds be green</div>
+                        <div class="words line3">and your bugs be few.</div>
+                        <div class="words line4">BIRA BANAT TODO — TODO ✊!</div>
+                        <div class="extra" id="extra" aria-hidden="true">
+                            <div class="divider"></div>
+                            <div class="extra-title">A tiny deploy script for today:</div>
+                            <pre class="code"><code>git checkout -b birthday
+npm i happiness
+npm run celebrate</code></pre>
+                            <div class="extra-actions">
+                                <button class="mini" id="copyWish" type="button">Copy wish</button>
+                            </div>
+                            <p class="extra-hint">Tip: press <span class="kbd">S</span> for confetti.</p>
+                        </div>
+                    </div>
+
+                    <!-- Floating hearts -->
+                    <div class="hearts" aria-hidden="true">
+                        <div class="floating-heart a1"></div>
+                        <div class="floating-heart a2"></div>
+                        <div class="floating-heart a3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="toggle" type="button">Open</button>
+            <button id="surprise" type="button" disabled>Surprise</button>
+            <button id="theme" type="button" aria-pressed="false">Midnight</button>
+        </div>
+
+        <footer class="footer">
+            <p class="hint"><span class="kbd">Space</span> open/close &middot; <span class="kbd">S</span> surprise &middot; <span class="kbd">T</span> theme</p>
+        </footer>
+    </main>
+
+    <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+    <canvas id="confetti" aria-hidden="true"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>
